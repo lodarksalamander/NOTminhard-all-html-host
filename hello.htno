@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hello, world — the sentence almost every programmer has typed</title>
+<meta name="description" content="The history of "hello, world": its 1972 origin with Brian Kernighan in the B language, why the phrase exists, and how to write it in sixteen languages.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --panel: #12171f;
+    --ink: #e6edf3;
+    --dim: #8b949e;
+    --accent: #58d68d;
+    --accent2: #7aa2f7;
+    --warn: #f0a35e;
+    --line: #262d38;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg2: #ffffff;
+    --panel: #ffffff;
+    --ink: #1f2328;
+    --dim: #59636e;
+    --accent: #1a7f37;
+    --accent2: #0969da;
+    --warn: #9a6700;
+    --line: #d1d9e0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.crt::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  [data-theme="light"] body.crt::before { opacity: .25; }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+  .topwrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand { font-family: var(--mono); font-size: 14px; color: var(--accent); white-space: nowrap; }
+  nav.links { display: flex; gap: 14px; margin-left: auto; flex-wrap: wrap; }
+  nav.links a { color: var(--dim); text-decoration: none; font-size: 13px; font-family: var(--mono); }
+  nav.links a:hover { color: var(--ink); }
+  .tbtn {
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    color: var(--dim);
+    font: 12px var(--mono);
+    border-radius: 999px;
+    padding: 5px 11px;
+    cursor: pointer;
+  }
+  .tbtn[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 0 20px 90px; }
+  section { margin-top: 74px; }
+  h1 { font-size: clamp(30px, 6.4vw, 54px); line-height: 1.08; margin: 0 0 14px; letter-spacing: -.02em; }
+  h2 { font-size: clamp(21px, 3.2vw, 28px); margin: 0 0 6px; letter-spacing: -.01em; }
+  h3 { font-size: 16px; margin: 0 0 4px; }
+  .kicker { font: 12px var(--mono); color: var(--accent); letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px; }
+  .lead { color: var(--dim); font-size: 17px; max-width: 62ch; margin: 0 0 8px; }
+  p { margin: 12px 0; }
+  a.src { color: var(--accent2); }
+
+  /* hero terminal */
+  .term {
+    margin: 28px 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    overflow: hidden;
+    box-shadow: 0 24px 70px -34px rgba(0,0,0,.75);
+  }
+  .term-top {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--bg2);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .term-title { font: 12px var(--mono); color: var(--dim); margin-left: 8px; }
+  .term-body { padding: 22px 20px 26px; font-family: var(--mono); font-size: clamp(15px, 3.4vw, 21px); min-height: 122px; }
+  .prompt { color: var(--accent); }
+  #typed { color: var(--ink); }
+  .caret { display: inline-block; width: 9px; height: 1.05em; background: var(--accent); vertical-align: -.16em; animation: blink 1.05s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .term-foot { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 20px 20px; }
+  .stat { font: 12px var(--mono); color: var(--dim); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; }
+  .stat b { color: var(--ink); font-weight: 600; }
+
+  /* timeline */
+  .timeline { list-style: none; margin: 26px 0 0; padding: 0 0 0 20px; border-left: 2px solid var(--line); }
+  .timeline li { position: relative; padding: 0 0 30px 22px; }
+  .timeline li:last-child { padding-bottom: 0; }
+  .timeline li::before {
+    content: ""; position: absolute; left: -30px; top: 6px;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--bg); border: 3px solid var(--accent);
+  }
+  .yr { font: 600 13px var(--mono); color: var(--accent); letter-spacing: .06em; }
+  .timeline h3 { margin-top: 3px; }
+  .timeline p { margin: 3px 0 0; color: var(--dim); font-size: 15px; max-width: 62ch; }
+
+  /* code blocks */
+  pre {
+    margin: 12px 0 0; padding: 15px 16px; overflow-x: auto;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.65; color: var(--ink);
+  }
+  code.inline { font-family: var(--mono); font-size: .92em; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+  .cm { color: var(--dim); }
+  .st { color: var(--warn); }
+  .kw { color: var(--accent2); }
+
+  /* translate lab */
+  .lab { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 22px; }
+  .field label { display: block; font: 12px var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 7px; }
+  #say {
+    width: 100%; padding: 13px 15px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); font: 15px var(--mono);
+  }
+  #say:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 11px; }
+  .chip { font: 12px var(--mono); border: 1px solid var(--line); background: transparent; color: var(--dim); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+  .chip:hover { color: var(--ink); border-color: var(--accent); }
+  .selectrow { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  select {
+    font: 13px var(--mono); padding: 9px 11px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  .out { position: relative; }
+  .copy {
+    position: absolute; top: 9px; right: 9px;
+    font: 11px var(--mono); padding: 5px 9px; border-radius: 7px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg2); color: var(--dim);
+  }
+  .copy:hover { color: var(--ink); border-color: var(--accent); }
+  .copy.done { color: var(--accent); border-color: var(--accent); }
+  .note { color: var(--dim); font-size: 13.5px; margin-top: 10px; }
+
+  /* cards */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 14px; margin-top: 22px; }
+  .card { border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); padding: 17px 18px; }
+  .card .n { font: 600 12px var(--mono); color: var(--accent); }
+  .card p { color: var(--dim); font-size: 14.5px; margin: 6px 0 0; }
+
+  /* langs table */
+  .langs { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 12px; margin-top: 22px; }
+  .lang { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+  .lang-h { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--bg2); }
+  .lang-h span { font: 600 12.5px var(--mono); }
+  .lang-h em { margin-left: auto; font: 11px var(--mono); color: var(--dim); font-style: normal; }
+  .lang pre { margin: 0; border: 0; border-radius: 0; background: transparent; font-size: 12.5px; padding: 12px; }
+
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding-top: 22px; color: var(--dim); font-size: 13.5px; }
+  footer ul { list-style: none; padding: 0; margin: 10px 0 0; }
+  footer li { margin: 4px 0; font: 12.5px var(--mono); word-break: break-word; }
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px);
+    background: var(--panel); color: var(--ink); border: 1px solid var(--accent);
+    border-radius: 10px; padding: 10px 16px; font: 13px var(--mono);
+    opacity: 0; transition: .22s; pointer-events: none; z-index: 1000;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 560px) {
+    nav.links { display: none; }
+    .term-body { min-height: 104px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caret { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="topwrap">
+    <span class="brand">$ ./hello-world</span>
+    <nav class="links">
+      <a href="#origin">origin</a>
+      <a href="#lab">lab</a>
+      <a href="#facts">facts</a>
+      <a href="#languages">languages</a>
+    </nav>
+    <button class="tbtn" id="themeBtn" aria-pressed="false" title="Toggle light and dark">theme</button>
+    <button class="tbtn" id="crtBtn" aria-pressed="false" title="CRT scanline effect">crt</button>
+  </div>
+</header>
+
+<main>
+  <section id="topo" style="margin-top:40px">
+    <p class="kicker">12 characters, 50 years of history</p>
+    <h1>hello, world<br><span style="color:var(--dim);font-weight:400">the sentence almost every programmer on Earth has typed.</span></h1>
+    <p class="lead">It is not a spec and not a framework. It is a program that does exactly one thing: say hi. And yet it survived five decades of computing and is still the first word of every new language.</p>
+
+    <div class="term">
+      <div class="term-top">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="term-title">pdp-11 — /usr/knh/tut/b.example</span>
+      </div>
+      <div class="term-body">
+        <span class="prompt">&gt;</span> <span id="typed"></span><span class="caret" aria-hidden="true"></span>
+      </div>
+      <div class="term-foot">
+        <span class="stat">first printed in <b>1972</b></span>
+        <span class="stat">author: <b>Brian Kernighan</b></span>
+        <span class="stat">home language: <b>B</b></span>
+        <span class="stat">went famous in: <b>1978, K&amp;R</b></span>
+      </div>
+    </div>
+    <p class="note">Type anything in the <a class="src" href="#lab">lab</a> below and watch your own "hi" appear in 16 languages.</p>
+  </section>
+
+  <section id="origin">
+    <h2>Where it came from</h2>
+    <p class="lead">Tiny test programs existed from the very beginning of computing, but the habit of using exactly <em>"hello, world"</em> as the test message traces back to examples Brian Kernighan wrote at Bell Labs.</p>
+
+    <ul class="timeline">
+      <li>
+        <span class="yr">1950s</span>
+        <h3>First, the radio</h3>
+        <p>Outside computing the English phrase was already the catchphrase of New York disc jockey William B. Williams, who opened his shows with it. So "hello, world" was not even invented by a programmer.</p>
+      </li>
+      <li>
+        <span class="yr">1972</span>
+        <h3>Its computer debut, in the B language</h3>
+        <p>In the memo <em>A Tutorial Introduction to the Language B</em>, Kernighan uses it in an example about external variables. It prints <code class="inline">hello, world!</code> with an exclamation mark and a newline. The previous example in that same tutorial only printed <code class="inline">hi!</code>, and this longer greeting was introduced on purpose.</p>
+      </li>
+      <li>
+        <span class="yr">1974</span>
+        <h3>New language, same words</h3>
+        <p>Kernighan reuses the phrase in the internal memo <em>Programming in C: A Tutorial</em>, now in C.</p>
+      </li>
+      <li>
+        <span class="yr">1978</span>
+        <h3>It becomes a ritual thanks to K&amp;R</h3>
+        <p><em>The C Programming Language</em> by Kernighan and Ritchie ships the example everybody now recognises, and that book is what spread the convention worldwide.</p>
+        <pre><code><span class="kw">#include</span> <span class="st">&lt;stdio.h&gt;</span>
+
+<span class="kw">int</span> main(<span class="kw">void</span>) {
+    printf(<span class="st">"hello, world\n"</span>);
+    <span class="kw">return</span> 0;
+}</code></pre>
+      </li>
+      <li>
+        <span class="yr">today</span>
+        <h3>The "does the light turn on?" of programming</h3>
+        <p>Before fighting with logic, a hello world answers three questions at once: the compiler works, the environment is wired up, and you managed to type it without a typo. Every serious new language still ships one as its official first test.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="lab">
+    <h2>The "hi" lab</h2>
+    <p class="lead">Write your message. Every snippet below updates live.</p>
+
+    <div class="lab">
+      <div class="field">
+        <label for="say">what do you want to tell the world</label>
+        <input id="say" type="text" value="hello, world" maxlength="60" autocomplete="off" spellcheck="false">
+        <div class="chips" id="chips">
+          <button class="chip" data-v="hello, world">K&amp;R original</button>
+          <button class="chip" data-v="Olá, mundo!">portuguese</button>
+          <button class="chip" data-v="こんにちは、世界">japanese</button>
+          <button class="chip" data-v="oi, penguin">PenguinMod</button>
+          <button class="chip" data-v="&quot;&lt;script&gt;alert(1)&lt;/script&gt;">injection attempt</button>
+        </div>
+      </div>
+
+      <div class="selectrow">
+        <label style="font:12px var(--mono);color:var(--dim)" for="langSel">LANGUAGE</label>
+        <select id="langSel"></select>
+        <button class="copy" id="copyAll">copy all</button>
+        <span class="note" id="sayBack"></span>
+      </div>
+
+      <div class="out">
+        <button class="copy" id="copyBtn">copy</button>
+        <pre id="codeOut"><code></code></pre>
+      </div>
+      <p class="note">Your message counts: <span id="counts"></span></p>
+    </div>
+  </section>
+
+  <section id="facts">
+    <h2>Things few people know</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="n">01</div>
+        <h3>The comma is B's fault</h3>
+        <p>In the B language a character constant held only four ASCII characters, so the greeting had to be split across several variables. That is why the phrase is punctured with a comma to this day.</p>
+      </div>
+      <div class="card">
+        <div class="n">02</div>
+        <h3>No capital letter, no exclamation</h3>
+        <p>The K&amp;R example prints <code class="inline">hello, world</code> — lowercase, no <code class="inline">!</code>. The 1972 B version did have one. "Hello, World!" is a later variation.</p>
+      </div>
+      <div class="card">
+        <div class="n">03</div>
+        <h3>Before it there was "hi!"</h3>
+        <p>Earlier in the very same 1972 tutorial, the example just printed <code class="inline">hi!</code>. The longer greeting was chosen because it needed more than one character constant.</p>
+      </div>
+      <div class="card">
+        <div class="n">04</div>
+        <h3>The Jargon File points further back</h3>
+        <p>Similar usage is reported around 1967 in BCPL. So Kernighan probably did not invent the phrase — he made it immortal.</p>
+      </div>
+      <div class="card">
+        <div class="n">05</div>
+        <h3>Length is a sport</h3>
+        <p>One line in Python, dozens of bytes in Linux assembly, and a full class plus a method signature in Java. Part of the fun of a new language is finding the smallest way to say hi.</p>
+      </div>
+      <div class="card">
+        <div class="n">06</div>
+        <h3>A politeness protocol</h3>
+        <p>Every language has a starter example, and it greets you instead of printing "error 0". A test program that says hi is still the most human way to report "it works".</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="languages">
+    <h2>The same "hi" in 16 languages</h2>
+    <p class="lead">All of these use the message from the lab above.</p>
+    <div class="langs" id="langs"></div>
+  </section>
+
+  <footer>
+    <strong>Sources checked</strong>
+    <ul>
+      <li>Wikipedia, <em>Hello, world</em> — History section (the 1972 B example, the 1974 memo, K&amp;R 1978, BCPL / Jargon File, William B. Williams).</li>
+      <li>Kernighan, B. W. <em>A Tutorial Introduction to the Language B</em>, Bell Laboratories, 1972.</li>
+      <li>Kernighan, B. W. <em>Programming in C: A Tutorial</em>, Bell Laboratories, 1974.</li>
+      <li>Kernighan, B. W. &amp; Ritchie, D. M. <em>The C Programming Language</em>, 1978.</li>
+    </ul>
+    <p style="margin-top:16px">Single file, no external dependencies. The snippets below were written by hand rather than transcribed from a book — double-check the syntax for your language version before compiling.</p>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------- data
+  // Each generator receives the message (always handled as plain text, never HTML).
+  var LANGS = [
+    { id: 'c', name: 'C', since: 'K&R 1978', f: function (m) {
+        return '#include <stdio.h>\n\nint main(void) {\n    printf("' + escC(m) + '\\n");\n    return 0;\n}'; } },
+    { id: 'cpp', name: 'C++', since: '1985', f: function (m) {
+        return '#include <iostream>\n\nint main() {\n    std::cout << "' + escC(m) + '" << std::endl;\n}'; } },
+    { id: 'py', name: 'Python', since: '1991', f: function (m) {
+        return 'print("' + escC(m) + '")'; } },
+    { id: 'js', name: 'JavaScript', since: '1995', f: function (m) {
+        return 'console.log("' + escC(m) + '");'; } },
+    { id: 'ts', name: 'TypeScript', since: '2012', f: function (m) {
+        return 'const msg: string = "' + escC(m) + '";\nconsole.log(msg);'; } },
+    { id: 'go', name: 'Go', since: '2009', f: function (m) {
+        return 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("' + escC(m) + '")\n}'; } },
+    { id: 'rs', name: 'Rust', since: '2010', f: function (m) {
+        return 'fn main() {\n    println!("' + escC(m) + '");\n}'; } },
+    { id: 'java', name: 'Java', since: '1995', f: function (m) {
+        return 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("' + escC(m) + '");\n    }\n}'; } },
+    { id: 'kt', name: 'Kotlin', since: '2011', f: function (m) {
+        return 'fun main() = println("' + escC(m) + '")'; } },
+    { id: 'swift', name: 'Swift', since: '2014', f: function (m) {
+        return 'print("' + escC(m) + '")'; } },
+    { id: 'rb', name: 'Ruby', since: '1995', f: function (m) {
+        return 'puts "' + escC(m) + '"'; } },
+    { id: 'lua', name: 'Lua', since: '1993', f: function (m) {
+        return 'print("' + escC(m) + '")'; } },
+    { id: 'sh', name: 'Bash', since: '1989', f: function (m) {
+        return 'echo ' + shellQuote(m); } },
+    { id: 'sql', name: 'SQL', since: '1974', f: function (m) {
+        return "SELECT '" + m.split("'").join("''") + "';"; } },
+    { id: 'html', name: 'HTML', since: '1993', f: function (m) {
+        return '<!DOCTYPE html>\n<html lang="en">\n<body>' + escHtml(m) + '</body>\n</html>'; } },
+    { id: 'css', name: 'CSS', since: '1996', f: function (m) {
+        return 'body::before {\n  content: "' + escC(m) + '";\n}'; } }
+  ];
+
+  function escHtml (s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function escC (s) {
+    return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+  }
+  function shellQuote (s) {
+    return "'" + String(s).split("'").join("'\\''") + "'";
+  }
+
+  // ---------------------------------------------------------------- typing
+  var typed = document.getElementById('typed');
+  var SEQ = ['pdp-11: run b.out', 'hello, world', '#include <stdio.h>', 'print("hello, world")', 'echo hi'];
+  var si = 0, ci = 0, del = false;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    typed.textContent = 'hello, world';
+  } else {
+    (function loop () {
+      var alvo = SEQ[si];
+      if (!del) {
+        ci++;
+        typed.textContent = alvo.slice(0, ci);
+        if (ci >= alvo.length) { del = true; return setTimeout(loop, 1500); }
+        return setTimeout(loop, 55 + Math.random() * 55);
+      }
+      ci -= 3;
+      if (ci <= 0) { ci = 0; del = false; si = (si + 1) % SEQ.length; }
+      typed.textContent = alvo.slice(0, Math.max(0, ci));
+      return setTimeout(loop, 28);
+    })();
+  }
+
+  // ---------------------------------------------------------------- lab
+  var input = document.getElementById('say');
+  var sel = document.getElementById('langSel');
+  var codeOut = document.getElementById('codeOut').querySelector('code');
+  var counts = document.getElementById('counts');
+  var sayBack = document.getElementById('sayBack');
+  var langsBox = document.getElementById('langs');
+
+  LANGS.forEach(function (l) {
+    var o = document.createElement('option');
+    o.value = l.id;
+    o.textContent = l.name;
+    sel.appendChild(o);
+  });
+  sel.value = 'c';
+
+  function msg () {
+    var v = input.value;
+    return v.length ? v : 'hello, world';
+  }
+
+  function byId (id) {
+    for (var i = 0; i < LANGS.length; i++) if (LANGS[i].id === id) return LANGS[i];
+    return LANGS[0];
+  }
+
+  function render () {
+    var m = msg();
+
+    // main block: plain text through textContent (nothing here becomes HTML)
+    codeOut.textContent = byId(sel.value).f(m);
+
+    // the 16 language cards
+    langsBox.textContent = '';
+    LANGS.forEach(function (l) {
+      var card = document.createElement('div');
+      card.className = 'lang';
+
+      var h = document.createElement('div');
+      h.className = 'lang-h';
+      var nm = document.createElement('span');
+      nm.textContent = l.name;
+      var de = document.createElement('em');
+      de.textContent = l.since;
+      var cp = document.createElement('button');
+      cp.className = 'copy';
+      cp.style.position = 'static';
+      cp.textContent = 'copy';
+      cp.addEventListener('click', function () {
+        copy(l.f(m), cp);
+      });
+      h.appendChild(nm);
+      h.appendChild(de);
+      h.appendChild(cp);
+
+      var pre = document.createElement('pre');
+      var code = document.createElement('code');
+      code.textContent = l.f(m);
+      pre.appendChild(code);
+
+      card.appendChild(h);
+      card.appendChild(pre);
+      langsBox.appendChild(card);
+    });
+
+    var chars = Array.from(m).length;
+    var words = m.split(/\s+/).filter(Boolean).length;
+    var bytes = (typeof Blob === 'function') ? new Blob([m]).size : m.length;
+    counts.textContent = chars + ' character(s) · ' + words + ' word(s) · ' + bytes + ' bytes in UTF-8';
+    sayBack.textContent = 'you said: “' + m + '”';
+  }
+
+  // ---------------------------------------------------------------- clipboard
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function ping (text) {
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 1600);
+  }
+
+  function copy (text, btn) {
+    function done () {
+      if (btn) {
+        btn.classList.add('done');
+        var old = btn.textContent;
+        btn.textContent = 'copied ✓';
+        setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1300);
+      }
+      ping('copied to your clipboard');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
+  function fallbackCopy (text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) done(); else ping('your browser blocked the copy');
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    copy(byId(sel.value).f(msg()), this);
+  });
+
+  document.getElementById('copyAll').addEventListener('click', function () {
+    var m = msg();
+    var all = LANGS.map(function (l) {
+      return '// ' + l.name + '\n' + l.f(m);
+    }).join('\n\n');
+    copy(all, this);
+  });
+
+  // ---------------------------------------------------------------- ui
+  document.getElementById('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    input.value = b.getAttribute('data-v');
+    render();
+    input.focus();
+  });
+
+  input.addEventListener('input', render);
+  sel.addEventListener('change', render);
+
+  var themeBtn = document.getElementById('themeBtn');
+  themeBtn.addEventListener('click', function () {
+    var root = document.documentElement;
+    var light = root.getAttribute('data-theme') === 'light';
+    if (light) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'light');
+    themeBtn.setAttribute('aria-pressed', String(!light));
+  });
+
+  var crtBtn = document.getElementById('crtBtn');
+  crtBtn.addEventListener('click', function () {
+    var on = document.body.classList.toggle('crt');
+    crtBtn.setAttribute('aria-pressed', String(on));
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
