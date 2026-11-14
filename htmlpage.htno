@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML — the language of the web</title>
+<meta name="description" content="A single-file guide to HTML: what a markup language is, the anatomy of an element, the version timeline from 1991 to the Living Standard, and a live sandboxed playground.">
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0d1117;
+    --bg-soft: #151b23;
+    --bg-card: #1a2230;
+    --line: #2b3646;
+    --tx: #e6edf3;
+    --tx-dim: #9aa7b8;
+    --tx-mute: #6c7a8d;
+    --accent: #e44d26;
+    --accent-soft: #ff8b60;
+    --ok: #4ade80;
+    --code-bg: #0a0e14;
+    --shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f7f9;
+    --bg-soft: #ffffff;
+    --bg-card: #ffffff;
+    --line: #dfe3ea;
+    --tx: #1b2430;
+    --tx-dim: #4d5b6d;
+    --tx-mute: #7c8899;
+    --accent: #c93a17;
+    --accent-soft: #e44d26;
+    --ok: #15803d;
+    --code-bg: #10161f;
+    --shadow: 0 12px 30px rgba(20, 30, 45, .10);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--tx);
+    font: 16px/1.65 ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, kbd, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, "Liberation Mono", monospace; }
+
+  /* ---------- header ---------- */
+  header.bar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .2px; }
+  .brand svg { width: 26px; height: 26px; flex: none; }
+  nav.links { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  nav.links a {
+    color: var(--tx-dim); text-decoration: none; font-size: 13.5px;
+    padding: 6px 10px; border-radius: 8px;
+  }
+  nav.links a:hover { color: var(--tx); background: var(--bg-card); }
+  button.mini {
+    border: 1px solid var(--line); background: var(--bg-card); color: var(--tx);
+    font-size: 13px; padding: 6px 11px; border-radius: 9px; cursor: pointer;
+  }
+  button.mini:hover { border-color: var(--accent); }
+
+  /* ---------- layout ---------- */
+  main { max-width: 1020px; margin: 0 auto; padding: 0 20px 90px; }
+  section { padding: 56px 0 8px; }
+  h1, h2, h3 { line-height: 1.15; margin: 0 0 14px; letter-spacing: -.02em; }
+  h1 { font-size: clamp(34px, 6.2vw, 62px); }
+  h2 { font-size: clamp(24px, 3.4vw, 34px); }
+  h3 { font-size: 18px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: clamp(17px, 2.2vw, 21px); color: var(--tx-dim); max-width: 68ch; }
+  .kicker {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent-soft); margin-bottom: 12px;
+  }
+  .note { color: var(--tx-mute); font-size: 14px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding-top: 64px; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+  @media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } nav.links { display: none; } }
+
+  .term {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .term-top {
+    display: flex; align-items: center; gap: 7px; padding: 9px 13px;
+    border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, .03);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #3a4657; }
+  .term-top .dot:nth-child(1) { background: #ff5f57; }
+  .term-top .dot:nth-child(2) { background: #febc2e; }
+  .term-top .dot:nth-child(3) { background: #28c840; }
+  .term-title { margin-left: 6px; font-size: 12px; color: #7f8ea3; }
+  pre { margin: 0; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; color: #d6e2f0; }
+  .t-tag { color: #ff8b60; }
+  .t-attr { color: #7dd3fc; }
+  .t-str { color: #a5e07a; }
+  .t-com { color: #6b7a8f; font-style: italic; }
+  .t-txt { color: #e8eef6; }
+
+  .preview {
+    margin-top: 12px; border: 1px dashed var(--line); border-radius: 12px;
+    padding: 14px 16px; background: var(--bg-soft);
+  }
+  .preview-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--tx-mute); margin-bottom: 8px; }
+
+  /* ---------- stat chips ---------- */
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; }
+  .stat {
+    flex: 1 1 150px; border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; background: var(--bg-card);
+  }
+  .stat b { display: block; font-size: 22px; letter-spacing: -.01em; }
+  .stat span { font-size: 12.5px; color: var(--tx-mute); }
+
+  /* ---------- cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  .card {
+    border: 1px solid var(--line); border-radius: 14px; padding: 16px 17px;
+    background: var(--bg-card);
+  }
+  .card h3 { font-size: 15.5px; margin-bottom: 6px; }
+  .card p { font-size: 14px; color: var(--tx-dim); margin: 0; }
+  .card .num { font-size: 11px; font-weight: 700; color: var(--accent-soft); letter-spacing: .1em; }
+
+  /* ---------- anatomy ---------- */
+  .anatomy { border: 1px solid var(--line); border-radius: 14px; background: var(--bg-card); padding: 20px; }
+  .ana-code {
+    font-size: clamp(17px, 3vw, 26px); line-height: 1.9; text-align: center;
+    padding: 18px 10px; border-radius: 10px; background: var(--code-bg); color: #d6e2f0;
+    overflow-x: auto; white-space: nowrap;
+  }
+  .ana-code span { cursor: pointer; border-radius: 6px; padding: 2px 4px; transition: background .15s, color .15s; }
+  .ana-code span:hover, .ana-code span.on { background: var(--accent); color: #fff; }
+  .ana-parts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .ana-parts button {
+    border: 1px solid var(--line); background: transparent; color: var(--tx-dim);
+    border-radius: 999px; padding: 6px 13px; font-size: 13px; cursor: pointer;
+  }
+  .ana-parts button[aria-pressed="true"] { border-color: var(--accent); color: var(--tx); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  .ana-desc { margin-top: 14px; min-height: 3.2em; font-size: 14.5px; color: var(--tx-dim); }
+  .ana-desc b { color: var(--tx); }
+
+  /* ---------- tables ---------- */
+  .wrap-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--bg-soft); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--tx-mute); }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  td code { color: var(--accent-soft); font-size: 13.5px; white-space: nowrap; }
+
+  /* ---------- timeline ---------- */
+  .timeline { position: relative; margin: 10px 0 0; padding-left: 26px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px;
+    background: linear-gradient(var(--accent), color-mix(in srgb, var(--accent) 20%, var(--line)));
+  }
+  .ev { position: relative; margin-bottom: 10px; }
+  .ev::before {
+    content: ""; position: absolute; left: -23px; top: 17px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--bg); border: 2px solid var(--accent);
+  }
+  .ev.major::before { background: var(--accent); }
+  .ev > button.head {
+    width: 100%; display: flex; align-items: baseline; gap: 12px; text-align: left;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 15px; color: var(--tx); cursor: pointer; font-size: 15px;
+  }
+  .ev > button.head:hover { border-color: var(--accent); }
+  .ev .year { font-weight: 700; color: var(--accent-soft); font-variant-numeric: tabular-nums; flex: none; }
+  .ev .what { flex: 1 1 auto; }
+  .ev .chev { margin-left: auto; color: var(--tx-mute); font-size: 12px; }
+  .ev .body {
+    display: none; padding: 12px 15px 4px; font-size: 14.5px; color: var(--tx-dim);
+    border-left: 2px solid var(--line); margin: 6px 0 0 8px;
+  }
+  .ev.open .body { display: block; }
+  .ev.open .chev { transform: rotate(90deg); }
+  .ev .body code { color: var(--accent-soft); background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+  /* ---------- playground ---------- */
+  .play { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 820px) { .play { grid-template-columns: 1fr; } }
+  .pane { border: 1px solid var(--line); border-radius: 14px; background: var(--bg-card); overflow: hidden; display: flex; flex-direction: column; }
+  .pane-top { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--bg-soft); }
+  .pane-top b { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-mute); }
+  .pane-top .spacer { margin-left: auto; display: flex; gap: 6px; }
+  textarea#src {
+    width: 100%; min-height: 250px; resize: vertical; border: 0; outline: 0;
+    background: var(--code-bg); color: #d6e2f0; padding: 14px;
+    font: 13.5px/1.65 ui-monospace, "Cascadia Code", Consolas, monospace; tab-size: 2;
+  }
+  iframe#out { width: 100%; height: 250px; border: 0; background: #fff; display: block; }
+  .bar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .chip {
+    border: 1px solid var(--line); background: transparent; color: var(--tx-dim);
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--tx); }
+  .run-state { font-size: 13px; color: var(--tx-mute); margin-left: auto; }
+  .run-state.ok { color: var(--ok); }
+  .run-state.bad { color: var(--accent-soft); }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); margin-top: 60px; padding: 26px 0 0; }
+  footer h3 { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--tx-mute); }
+  footer ol { margin: 0; padding: 0 0 0 20px; font-size: 14px; color: var(--tx-dim); }
+  footer li { margin-bottom: 6px; }
+  footer a { color: var(--accent-soft); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .fine { font-size: 13px; color: var(--tx-mute); margin-top: 18px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <polygon points="3,1 29,1 26.5,29 16,31.5 5.5,29" fill="#e44d26"/>
+      <polygon points="16,3.2 16,29.3 24.3,27.3 26.5,3.2" fill="#f16529"/>
+      <path d="M9.1 6.9h13.8l-.3 3.2H12.1l.3 3.1h10l-.7 7.3-5.7 1.6-5.7-1.6-.4-3.9h2.8l.2 1.7 3.1 .8 3.1-.8 .3-3.3H8.8z" fill="#ffffff"/>
+    </svg>
+    <span>HTML</span>
+  </div>
+  <nav class="links">
+    <a href="#what">What it is</a>
+    <a href="#anatomy">Anatomy</a>
+    <a href="#elements">Elements</a>
+    <a href="#history">History</a>
+    <a href="#play">Playground</a>
+  </nav>
+  <button class="mini" id="theme" type="button">Light</button>
+</header>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <span class="kicker">HyperText Markup Language</span>
+    <h1>The web&rsquo;s native tongue</h1>
+    <p class="lead">
+      HTML is not a programming language. It has no loops, no variables, no logic. It is a
+      <strong>markup</strong> language: you wrap content in tags and tell a browser what the
+      content <em>is</em> &mdash; a heading, a paragraph, a link, a picture of a cat. The browser
+      reads that description and decides how to show it.
+    </p>
+
+    <div class="grid2" style="margin-top:28px">
+      <div>
+        <div class="term">
+          <div class="term-top">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="term-title">index.html</span>
+          </div>
+<pre><code><span class="t-com">&lt;!DOCTYPE html&gt;</span>
+<span class="t-tag">&lt;html</span> <span class="t-attr">lang</span>=<span class="t-str">"en"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;head&gt;</span>
+    <span class="t-tag">&lt;meta</span> <span class="t-attr">charset</span>=<span class="t-str">"utf-8"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;title&gt;</span><span class="t-txt">My first page</span><span class="t-tag">&lt;/title&gt;</span>
+  <span class="t-tag">&lt;/head&gt;</span>
+  <span class="t-tag">&lt;body&gt;</span>
+    <span class="t-tag">&lt;h1&gt;</span><span class="t-txt">Hello</span><span class="t-tag">&lt;/h1&gt;</span>
+    <span class="t-tag">&lt;p&gt;</span><span class="t-txt">I wrote this in HTML.</span><span class="t-tag">&lt;/p&gt;</span>
+    <span class="t-tag">&lt;a</span> <span class="t-attr">href</span>=<span class="t-str">"https://www.w3.org/TR/html52/"</span><span class="t-tag">&gt;</span><span class="t-txt">the spec</span><span class="t-tag">&lt;/a&gt;</span>
+  <span class="t-tag">&lt;/body&gt;</span>
+<span class="t-tag">&lt;/html&gt;</span></code></pre>
+        </div>
+        <p class="note" style="margin-top:12px">
+          Every page you have ever read is this, at scale. Six nesting levels and a
+          couple of hundred element types between you and the cat picture.
+        </p>
+      </div>
+
+      <div>
+        <div class="stats" style="margin-top:0">
+          <div class="stat"><b>1991</b><span>first public description</span></div>
+          <div class="stat"><b>18</b><span>elements in that document</span></div>
+          <div class="stat"><b>~130</b><span>element types today</span></div>
+          <div class="stat"><b>1</b><span>language every browser speaks</span></div>
+        </div>
+        <div class="preview" style="margin-top:14px">
+          <div class="preview-label">What the code above renders</div>
+          <h3 style="margin:0 0 6px">Hello</h3>
+          <p style="margin:0 0 6px">I wrote this in HTML.</p>
+          <a href="https://www.w3.org/TR/html52/" rel="noopener">the spec</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHAT IT IS ============ -->
+  <section id="what">
+    <span class="kicker">Vocabulary</span>
+    <h2>Three words that explain everything</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="num">01</div>
+        <h3>HyperText</h3>
+        <p>Text that contains links to other text. The link &mdash; the <code>a</code> element &mdash; is the
+        reason the web is a <em>web</em> instead of a library. Berners-Lee&rsquo;s original insight was
+        the hyperlink, not the markup.</p>
+      </div>
+      <div class="card">
+        <div class="num">02</div>
+        <h3>Markup</h3>
+        <p>Notes added to a document that describe it rather than say anything. Print editors did this
+        with pens in the margins for a century. A pair of tags is the digital version of &ldquo;this line
+        is a headline.&rdquo;</p>
+      </div>
+      <div class="card">
+        <div class="num">03</div>
+        <h3>Language</h3>
+        <p>Not a programming language: there is no computation in HTML, no conditionals, no state.
+        It is a declarative document format &mdash; closer to a blueprint than to a recipe. Logic lives in
+        JavaScript, looks in CSS.</p>
+      </div>
+      <div class="card">
+        <div class="num">04</div>
+        <h3>Structure vs. style</h3>
+        <p>HTML says <em>what</em> something is. CSS says <em>how</em> it looks. That split is deliberate:
+        the same document can be rendered by a desktop browser, a phone, a screen reader or a
+        text-only terminal, because meaning survives styling.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ANATOMY ============ -->
+  <section id="anatomy">
+    <span class="kicker">Anatomy</span>
+    <h2>What a tag actually is</h2>
+    <p class="lead" style="margin-bottom:20px">Click any piece. Or any button.</p>
+
+    <div class="anatomy">
+      <div class="ana-code mono" id="ana-code" aria-label="Anatomy of an HTML element"></div>
+      <div class="ana-parts" id="ana-parts"></div>
+      <div class="ana-desc" id="ana-desc"></div>
+    </div>
+
+    <div class="cards" style="margin-top:18px">
+      <div class="card">
+        <h3>Void elements close themselves</h3>
+        <p><code>&lt;img&gt;</code>, <code>&lt;br&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;hr&gt;</code> and a few
+        others have no content and no closing tag. Writing <code>&lt;img/&gt;</code> with the trailing slash is
+        legal XML habit carried over; HTML ignores it.</p>
+      </div>
+      <div class="card">
+        <h3>Booleans are just the word</h3>
+        <p>A presence-only attribute needs no value: <code>&lt;input required&gt;</code>, <code>&lt;details open&gt;</code>.
+        You may also write <code>required="required"</code>, but nobody sane does.</p>
+      </div>
+      <div class="card">
+        <h3>Case stopped mattering in 1998</h3>
+        <p>Early HTML came out of SGML, where element names were case-sensitive. HTML as a markup
+        application declared names in upper case; browsers accepted anything. Lower case won by usage,
+        not by law.</p>
+      </div>
+      <div class="card">
+        <h3>The parser is forgiving</h3>
+        <p>Browsers never reject a page for bad markup &mdash; they repair it. Miss a closing tag and the
+        tree still builds. That error tolerance is why the 1990s web did not collapse, and why two
+        browsers can disagree about your page.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELEMENTS ============ -->
+  <section id="elements">
+    <span class="kicker">Reference</span>
+    <h2>The semantic set</h2>
+    <p class="lead" style="margin-bottom:20px">
+      HTML5 added a group of elements whose names describe the <em>role</em> of a region instead of its look.
+      A screen reader builds a navigable outline out of these; a <code>div</code> gives it nothing.
+    </p>
+
+    <div class="wrap-scroll">
+      <table>
+        <thead>
+          <tr><th>Element</th><th>Means</th><th>Notes</th></tr>
+        </thead>
+        <tbody id="el-rows"></tbody>
+      </table>
+    </div>
+
+    <p class="note" style="margin-top:14px">
+      Of the 18 elements described in the first public HTML document of 1991, 11 are still part of
+      the language. Headings, paragraphs, lists and links made it. <code>center</code>, <code>font</code>,
+      <code>blink</code> and <code>marquee</code> did not &mdash; they are in the spec only in the section that
+      tells you not to use them.
+    </p>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section id="history">
+    <span class="kicker">Timeline</span>
+    <h2>Thirty-five years, one document format</h2>
+    <p class="lead" style="margin-bottom:24px">Click an entry for the details.</p>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- ============ PLAYGROUND ============ -->
+  <section id="play">
+    <span class="kicker">Try it</span>
+    <h2>Markup playground</h2>
+    <p class="lead" style="margin-bottom:18px">
+      Type HTML on the left. The right pane is a real browser document &mdash; sealed inside a sandboxed
+      frame, so scripts you paste cannot touch this page.
+    </p>
+
+    <div class="play">
+      <div class="pane">
+        <div class="pane-top">
+          <b>Your markup</b>
+          <div class="spacer">
+            <button class="chip" id="fmt" type="button">Indent</button>
+            <button class="chip" id="copy" type="button">Copy</button>
+          </div>
+        </div>
+        <textarea id="src" spellcheck="false" aria-label="HTML source editor">&lt;h1&gt;Título&lt;/h1&gt;
+&lt;p&gt;HTML is &lt;strong&gt;declarative&lt;/strong&gt;: you describe the document, the browser draws it.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;structure — &lt;code&gt;section&lt;/code&gt;, &lt;code&gt;nav&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;meaning — &lt;code&gt;time&lt;/code&gt;, &lt;code&gt;mark&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;media — &lt;code&gt;canvas&lt;/code&gt;, &lt;code&gt;video&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;“The hypertext project.” — Tim Berners-Lee, 1990&lt;/blockquote&gt;
+
+&lt;button onclick="this.dataset.n=(+this.dataset.n||0)+1;this.textContent='clicked '+this.dataset.n+'× — script ran, inside the box'"&gt;Click me&lt;/button&gt;</textarea>
+      </div>
+
+      <div class="pane">
+        <div class="pane-top">
+          <b>Rendered</b>
+          <div class="spacer">
+            <button class="chip" id="run" type="button">Run now</button>
+          </div>
+        </div>
+        <iframe id="out" title="Rendered preview" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
+
+    <div class="bar-row">
+      <span class="note">Start from:</span>
+      <button class="chip" data-snippet="structure">Page skeleton</button>
+      <button class="chip" data-snippet="text">Text &amp; semantics</button>
+      <button class="chip" data-snippet="form">Form</button>
+      <button class="chip" data-snippet="media">Media &amp; widgets</button>
+      <button class="chip" data-snippet="naughty">Broken markup</button>
+      <span class="run-state" id="state"></span>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <h3>Sources</h3>
+    <ol>
+      <li>Wikipedia &mdash; <a href="https://en.wikipedia.org/wiki/HTML" rel="noopener">HTML</a> (history, versions, element counts)</li>
+      <li>Wikipedia &mdash; <a href="https://en.wikipedia.org/wiki/HTML5" rel="noopener">HTML5</a> (WHATWG, 2004 fork, 28 October 2014 Recommendation)</li>
+      <li>W3C &mdash; <a href="https://www.w3.org/TR/html52/" rel="noopener">HTML 5.2 Recommendation</a> and the earlier dated specs</li>
+      <li>WHATWG &mdash; <a href="https://html.spec.whatwg.org/multipage/" rel="noopener">HTML Living Standard</a>, the version browsers implement today</li>
+      <li>MDN &mdash; <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element" rel="noopener">HTML element reference</a> (obsolete vs. current elements)</li>
+      <li>IETF &mdash; <a href="https://www.rfc-editor.org/rfc/rfc1866" rel="noopener">RFC 1866</a>, HyperText Markup Language 2.0, 24 November 1995</li>
+    </ol>
+    <p class="fine">
+      Dates, version codenames and element counts on this page were checked against the sources above.
+      The page itself is one dependency-free file &mdash; no framework, no build step. Its own markup is
+      the argument: <code>header</code>, <code>main</code>, <code>section</code>, <code>nav</code>, <code>table</code>,
+      <code>footer</code> &mdash; and the preview frame is <code>sandbox="allow-scripts"</code>, which is why the
+      JavaScript in the playground stays inside the box.
+    </p>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ theme */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('theme');
+  function setTheme(t) {
+    root.setAttribute('data-theme', t);
+    themeBtn.textContent = t === 'dark' ? 'Light' : 'Dark';
+    try { localStorage.setItem('html_lang_theme', t); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('html_lang_theme'); } catch (e) {}
+  setTheme(saved === 'light' ? 'light' : 'dark');
+  themeBtn.addEventListener('click', function () {
+    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  /* ---------------------------------------------------------------- anatomy */
+  var PARTS = [
+    { id: 'open',  cls: 't-tag', text: '<a',          label: 'open tag',     desc: '<b>Tag name.</b> The element&rsquo;s type, always the first thing inside the angle brackets. <code>a</code> means &ldquo;hyperlink&rdquo;.' },
+    { id: 'attr',  cls: 't-attr', text: ' href',       label: 'attribute',    desc: '<b>Attribute.</b> Extra configuration attached to this one element, in a name/value pair. An element can carry none, one or many.' },
+    { id: 'val',   cls: 't-str', text: '="docs.html"', label: 'value',        desc: '<b>Value.</b> What the attribute is set to. Quoted when it matters; quotes are optional for simple single-token values, so use them anyway.' },
+    { id: 'gt',    cls: 't-tag', text: '>',            label: 'punctuation',  desc: '<b>Closer.</b> Ends the open tag. Missing it makes everything after it part of the attribute soup &mdash; the classic invisible bug.' },
+    { id: 'txt',   cls: 't-txt', text: 'Read this',    label: 'content',      desc: '<b>Content.</b> The stuff the reader sees. Text, other elements, or both nested arbitrarily deep. This is what the element is <em>about</em>.' },
+    { id: 'close', cls: 't-tag', text: '</a>',         label: 'closing tag',  desc: '<b>Closing tag.</b> Same name with a slash. It marks where the element ends. Without it the browser guesses, and its guess becomes your layout bug.' }
+  ];
+
+  var anaCode = document.getElementById('ana-code');
+  var anaParts = document.getElementById('ana-parts');
+  var anaDesc = document.getElementById('ana-desc');
+
+  PARTS.forEach(function (p) {
+    var s = document.createElement('span');
+    s.className = p.cls;
+    s.textContent = p.text;
+    s.dataset.part = p.id;
+    s.setAttribute('role', 'button');
+    s.setAttribute('tabindex', '0');
+    s.title = p.label;
+    anaCode.appendChild(s);
+
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = p.label;
+    b.dataset.part = p.id;
+    b.setAttribute('aria-pressed', 'false');
+    anaParts.appendChild(b);
+  });
+
+  function pick(id) {
+    var p = null;
+    for (var i = 0; i < PARTS.length; i++) if (PARTS[i].id === id) p = PARTS[i];
+    Array.prototype.forEach.call(anaCode.children, function (el) {
+      el.classList.toggle('on', el.dataset.part === id);
+    });
+    Array.prototype.forEach.call(anaParts.children, function (el) {
+      el.setAttribute('aria-pressed', String(el.dataset.part === id));
+    });
+    anaDesc.textContent = '';
+    if (p) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = p.desc;
+      while (tmp.firstChild) anaDesc.appendChild(tmp.firstChild);
+    }
+  }
+  anaCode.addEventListener('click', function (e) { if (e.target.dataset.part) pick(e.target.dataset.part); });
+  anaCode.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.part) { e.preventDefault(); pick(e.target.dataset.part); }
+  });
+  anaParts.addEventListener('click', function (e) { if (e.target.dataset.part) pick(e.target.dataset.part); });
+  pick('open');
+
+  /* --------------------------------------------------------------- elements */
+  var ELEMENTS = [
+    ['article',    'A self-contained piece that still makes sense lifted out &mdash; a post, a review, one chapter.', 'Nests; each can carry its own header and footer.'],
+    ['section',    'A thematic grouping, usually with a heading.', 'Not a styling wrapper &mdash; that is what div is for.'],
+    ['nav',        'A block of major navigation links.', 'Landmark: screen readers jump straight to it.'],
+    ['aside',      'Content tangentially related to what surrounds it.', 'Sidebar, callout, ad, glossary.'],
+    ['header',     'Introductory content for its nearest section or the page.', 'A page-level header is not the same as a section header.'],
+    ['footer',     'Closing content: authorship, copyright, related links.', 'Also valid inside article and section.'],
+    ['main',       'The unique primary content of this page.', 'At most one visible per document; never inside header, footer or nav.'],
+    ['figure',     'Illustration, code block, diagram or photo that is referenced by the text.', 'Pairs with figcaption.'],
+    ['figcaption', 'The caption belonging to a figure.', 'First or last child of figure.'],
+    ['details',    'A disclosure widget that expands on click. No JavaScript.', 'Open state tracked by the open attribute; summary is the label.'],
+    ['summary',    'The visible one-line label of a details widget.', 'A native accordion in two tags.'],
+    ['dialog',     'A modal or non-modal window, with focus trapping built in.', 'showModal() gives you the overlay and Esc-to-close for free.'],
+    ['time',       'A machine-readable date or duration.', 'datetime="2026-11-13" while humans read &ldquo;today&rdquo;.'],
+    ['mark',       'Text highlighted for relevance, e.g. a search hit.', 'Not a substitute for styling.'],
+    ['picture',    'Art-direction for one image: pick a source by width or format.', 'Contains source elements plus a fallback img.'],
+    ['video',      'Embedded moving image with native controls.', 'New in HTML5 &mdash; before it, that was a plugin.'],
+    ['audio',      'Embedded sound.', 'Same HTML5 story as video.'],
+    ['canvas',     'A bitmap the script draws into pixel by pixel.', 'Nothing in the DOM per drawing; a whole graphics API in one tag.'],
+    ['template',   'Markup that is parsed but not rendered, held for cloning.', 'Inert: scripts inside it do not run.'],
+    ['slot',       'A named hole inside a custom element&rsquo;s shadow tree.', 'Part of Web Components, defined in the HTML spec.']
+  ];
+
+  var rows = document.getElementById('el-rows');
+  ELEMENTS.forEach(function (e) {
+    var tr = document.createElement('tr');
+    var t1 = document.createElement('td');
+    var c = document.createElement('code');
+    c.textContent = '<' + e[0] + '>';
+    t1.appendChild(c);
+    var t2 = document.createElement('td');
+    var t3 = document.createElement('td');
+    tr.appendChild(t1); tr.appendChild(t2); tr.appendChild(t3);
+    rows.appendChild(tr);
+    setHTML(t2, e[1]);
+    setHTML(t3, e[2]);
+  });
+
+  /* ---------------------------------------------------------------- history */
+  var EVENTS = [
+    { y: '1980', t: 'ENQUIRE, the before-time', m: true,
+      d: 'At CERN, Tim Berners-Lee builds <code>ENQUIRE</code>, a personal hypertext system for notes and cross-references. It is not HTML, but the hyperlink idea is already there, and so is the memory of what he wished it had done.' },
+    { y: '1989', t: 'A memo, marked at the bottom &ldquo;vague but exciting&rdquo;', m: true,
+      d: 'Berners-Lee proposes a large hyperlinked document system over the internet. The March proposal; in 1990 Robert Cailliau co-authors a revised version and the project is accepted.' },
+    { y: '1990', t: 'The first browser, the first server, the first page', m: true,
+      d: 'NeXT machine at CERN: info.cern.ch, WorldWideWeb the editor-browser, and the very first HTML documents. HTML itself is specified in the second half of the year.' },
+    { y: 'late 1991', t: '&ldquo;HTML Tags&rdquo; &mdash; 18 elements', m: true,
+      d: 'May 1991 on the alt.hypertext newsgroup: the first public description of HTML, as a reference of <strong>18 elements</strong>. The design leans heavily on CERN&rsquo;s existing SGML vocabulary, with one deliberate break: the hyperlink tag is HTML&rsquo;s own invention. Eleven of those eighteen elements still exist in HTML 4.' },
+    { y: '1993', t: 'The IETF tries to standardise it', m: false,
+      d: 'An internet draft co-authored by Berners-Lee and Dan Connolly, &ldquo;Hypertext Markup Language&rdquo;, plus Dave Raggett&rsquo;s competing <code>HTML+</code> proposal. Drafts expire; nothing ships as a standard yet.' },
+    { y: '1994', t: 'HTML Working Group + W3C founded', m: false,
+      d: 'The IETF sets up an HTML Working Group. Berners-Lee leaves CERN for MIT and founds the <strong>World Wide Web Consortium</strong>, which from 1996 on takes over HTML standardisation.' },
+    { y: '24 Nov 1995', t: 'HTML 2.0 &mdash; the first real standard', m: true,
+      d: '<strong>RFC 1866</strong>. Not &ldquo;version 2 of HTML 1&rdquo;: it is the first version ratified as a standard, named 2.0 to leave room for the features already in flight. Follow-on RFCs bolt on form file upload (1867), tables (1942), image maps (1980) and internationalisation (2070).' },
+    { y: '14 Jan 1997', t: 'HTML 3.2 &ldquo;Wilbur&rdquo;', m: true,
+      d: 'The first W3C Recommendation. It ratifies what browsers had already implemented &mdash; tables, applets, text flow around images &mdash; and settles the tag war by refusing to include the two elements the vendors were fighting over: Netscape&rsquo;s <code>blink</code> and Microsoft&rsquo;s <code>marquee</code>. Both were left out by mutual agreement. The web is grateful.' },
+    { y: '18 Dec 1997', t: 'HTML 4.0 &ldquo;Cougar&rdquo;', m: true,
+      d: 'Introduces the three flavours: <strong>Strict</strong>, <strong>Transitional</strong> and <strong>Frameset</strong>. Strict forbids the presentation elements; Transitional tolerates them for the migration period. Reissued with corrections on 24 April 1998; last errata 12 May 2001.' },
+    { y: '24 Dec 1999', t: 'HTML 4.01', m: true,
+      d: 'A maintenance revision of 4.0 &mdash; bug fixes and clarifications, no new features. For five years, this is the state of the art.' },
+    { y: '2000', t: 'HTML becomes an ISO standard', m: false,
+      d: '<strong>ISO/IEC 15445:2000</strong>, &ldquo;Information technology &mdash; Hypertext markup language (HTML)&rdquo;, the ISO-published twin of HTML 4.01. A quiet milestone: the web&rsquo;s document format now sits beside every other formal standard.' },
+    { y: '2004', t: 'WHATWG says no', m: true,
+      d: 'Apple, Mozilla and Opera walk out of W3C. HTML 4.01 had not changed since 2000 while the working group pursued XHTML 2, a redesign. The dissenters form the <strong>Web Hypertext Application Technology Working Group</strong> and start from what browsers already do, aiming at backward compatibility instead of a clean slate.' },
+    { y: '22 Jan 2008', t: 'HTML5, first public working draft', m: false,
+      d: 'W3C and WHATWG briefly share a deliverable. The form the specification eventually takes is WHATWG&rsquo;s, not W3C&rsquo;s.' },
+    { y: '28 Oct 2014', t: 'HTML5 is finished', m: true,
+      d: 'W3C declares HTML5 a Recommendation. <code>video</code>, <code>audio</code>, <code>canvas</code>, <code>details</code>, <code>main</code>, <code>section</code>, <code>article</code>, <code>header</code>, <code>footer</code>, <code>aside</code>, <code>nav</code>, <code>figure</code> &mdash; the tags that replaced the plugin era.' },
+    { y: '2016 \u2192 now', t: 'The Living Standard', m: true,
+      d: 'There is no HTML6. WHATWG maintains the <strong>HTML Living Standard</strong> &mdash; one continuously updated document, with browsers shipping pieces of it as they land. Versions now exist only as snapshots of an ongoing conversation between five organisations and a lot of test cases.' }
+  ];
+
+  var tl = document.getElementById('timeline');
+  EVENTS.forEach(function (ev, i) {
+    var art = document.createElement('div');
+    art.className = 'ev' + (ev.m ? ' major' : '');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'head';
+    btn.setAttribute('aria-expanded', 'false');
+    var y = document.createElement('span'); y.className = 'year mono'; y.textContent = ev.y;
+    var w = document.createElement('span'); w.className = 'what';
+    var ch = document.createElement('span'); ch.className = 'chev'; ch.textContent = '\u25B8';
+    btn.appendChild(y); btn.appendChild(w); btn.appendChild(ch);
+    var body = document.createElement('div');
+    body.className = 'body';
+    art.appendChild(btn); art.appendChild(body);
+    tl.appendChild(art);
+    setHTML(w, ev.t);
+    setHTML(body, ev.d);
+    btn.addEventListener('click', function () {
+      var open = art.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    if (ev.m) { art.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    if (i === EVENTS.length - 1) { art.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  });
+
+  /* ------------------------------------------------------------ playground */
+  var src = document.getElementById('src');
+  var out = document.getElementById('out');
+  var state = document.getElementById('state');
+  var timer = null;
+
+  var STYLE =
+    '<style>body{font:16px/1.6 system-ui,sans-serif;color:#1b2430;margin:16px}' +
+    'code{background:#f2f3f6;padding:1px 5px;border-radius:4px;font-family:ui-monospace,Consolas,monospace}' +
+    'blockquote{margin:12px 0;padding:6px 14px;border-left:3px solid #e44d26;color:#4d5b6d}' +
+    'button{font:inherit;padding:7px 14px;border:1px solid #c93a17;background:#e44d26;color:#fff;border-radius:8px}' +
+    'table{border-collapse:collapse}td,th{border:1px solid #ccd2dc;padding:6px 10px;text-align:left}' +
+    'label{display:block;margin:6px 0}input,select,textarea{font:inherit}</style>';
+
+  var SHELL = '<!DOCTYPE html><html><head><meta charset="utf-8">' + STYLE + '</head><body>';
+
+  function run() {
+    var v = src.value;
+    /* a whole document gets used as-is (just given our stylesheet); a fragment goes in the shell */
+    var full = /<!doctype\s+html/i.test(v) || /<html[\s>]/i.test(v);
+    out.srcdoc = full
+      ? (/<\/head>/i.test(v) ? v.replace(/<\/head>/i, STYLE + '</head>') : v)
+      : SHELL + v + '</body></html>';
+    var bytes = new TextEncoder().encode(v).length;
+    state.textContent = 'rendered ' + (full ? 'whole document' : 'fragment') +
+      ' \u2014 ' + v.length + ' chars, ' + bytes + ' utf-8 bytes';
+    state.className = 'run-state ok';
+  }
+
+  src.addEventListener('input', function () {
+    state.textContent = 'typing\u2026';
+    state.className = 'run-state';
+    clearTimeout(timer);
+    timer = setTimeout(run, 450);
+  });
+  document.getElementById('run').addEventListener('click', run);
+
+  document.getElementById('fmt').addEventListener('click', function () {
+    src.value = src.value.replace(/></g, '>\n<');
+    run();
+  });
+
+  document.getElementById('copy').addEventListener('click', function () {
+    var done = function (ok) {
+      state.textContent = ok ? 'copied to clipboard' : 'copy failed \u2014 select the text instead';
+      state.className = 'run-state ' + (ok ? 'ok' : 'bad');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(src.value).then(function () { done(true); }, function () { done(false); });
+      return;
+    }
+    src.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    done(ok);
+  });
+
+  var SNIPPETS = {
+    structure: '<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    <title>Skeleton</title>\n  </head>\n  <body>\n    <header>\n      <nav><a href="/">home</a> · <a href="/about">about</a></nav>\n    </header>\n    <main>\n      <h1>A page</h1>\n      <article>\n        <h2>One article</h2>\n        <p>Body text.</p>\n      </article>\n    </main>\n    <footer><p><small>&copy; 2026</small></p></footer>\n  </body>\n</html>',
+    text: '<h1>Headings rank, they do not size</h1>\n<h2>Second level</h2>\n<h3>Third level</h3>\n\n<p>\n  <strong>Important</strong> and <em>emphasised</em> mean something;\n  <b>bold</b> and <i>italic</i> only look like something.\n  Press <kbd>Ctrl</kbd> + <kbd>S</kbd>, visit <abbr title="World Wide Web Consortium">W3C</abbr>,\n  and note the <mark>highlighted</mark> bit.\n</p>\n\n<p>Today is <time datetime="2026-11-13">Friday the 13th</time>.</p>\n\n<details>\n  <summary>No JavaScript accordion</summary>\n  <p>The open state is an attribute, so it survives in the DOM.</p>\n</details>\n\n<figure>\n  <pre><code>printf("hi");</code></pre>\n  <figcaption>A figure and its caption.</figcaption>\n</figure>',
+    form: '<form>\n  <label>Name <input name="who" required placeholder="you"></label>\n  <label>Email <input type="email" name="mail" autocomplete="email"></label>\n  <label>Birthday <input type="date" name="born"></label>\n  <label>Volume <input type="range" name="vol" min="0" max="11" value="7"></label>\n  <label>\n    Colour\n    <select name="hue">\n      <option>red</option>\n      <option selected>green</option>\n      <option>blue</option>\n    </select>\n  </label>\n  <fieldset>\n    <legend>Pick one</legend>\n    <label><input type="radio" name="x" value="a" checked> a</label>\n    <label><input type="radio" name="x" value="b"> b</label>\n  </fieldset>\n  <label><input type="checkbox" name="agree"> I agree</label>\n  <p><output name="echo">live output goes here</output></p>\n  <button type="submit">Send</button>\n</form>',
+    media: '<p>Video and audio replaced the plugin era in one release.</p>\n\n<video controls width="320" poster="https://example.invalid/missing.png">\n  <source src="clip.webm" type="video/webm">\n  <source src="clip.mp4" type="video/mp4">\n  Your browser has no video element.\n</video>\n\n<audio controls>\n  <source src="sound.ogg" type="audio/ogg">\n</audio>\n\n<p>The canvas is a bitmap; the DOM sees one rectangle, the script sees pixels.</p>\n\n<canvas id="c" width="300" height="90" style="border:1px solid #ccd2dc"></canvas>\n<script>\n  var g = document.getElementById("c").getContext("2d");\n  for (var i = 0; i < 300; i++) {\n    g.strokeStyle = "hsl(" + i + ",70%,55%)";\n    g.beginPath(); g.moveTo(i, 90); g.lineTo(i, 90 - 60 * Math.abs(Math.sin(i / 40)));\n    g.stroke();\n  }\n<\/script>\n\n<progress value="62" max="100"></progress>\n<meter min="0" max="1" low=".3" high=".8" value=".92">92%</meter>',
+    naughty: '<!-- Everything here is illegal, and the browser will still render it. -->\n<div class="a"\n<p>unclosed paragraph\ndiv class="b"&gt;forgot the brackets on this div\n<ul>\n  <li>one\n  <li>two — list items may skip </li>\n</ul>\n<b><i>bold italic never closed\n<h1>Heading</h1>\n<h1>Another heading, same level, why not</h1>\n<img src="no-alt.png">\n<a href="#" onclick="alert(\'inline handler\')">click</a>\n<center>deprecated, still works</center>\n<font color="purple">deprecated, still works</font>\n<table><td>no tbody, fine</td></table>'
+  };
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-snippet]'), function (b) {
+    b.addEventListener('click', function () {
+      src.value = SNIPPETS[b.dataset.snippet] || '';
+      run();
+    });
+  });
+
+  /* ------------------------------------------------------------- utilities */
+  /* Renders a tiny safe subset (a, code, strong, em, p, br, · and quotes)
+     from the data above through the DOM instead of trusting it wholesale. */
+  function setHTML(target, str) {
+    target.textContent = '';
+    var re = /<(a|code|strong|em|b|i|small|sup)\b([^>]*)>([\s\S]*?)<\/\1>|<br\s*\/?>|<!DOCTYPE\s*html>/gi;
+    var last = 0, m;
+    function plain(text) {
+      if (!text) return;
+      target.appendChild(document.createTextNode(decodeEntities(text)));
+    }
+    while ((m = re.exec(str)) !== null) {
+      plain(str.slice(last, m.index));
+      last = m.index + m[0].length;
+      if (m[1]) {
+        var el = document.createElement(m[1].toLowerCase());
+        var href = /\bhref\s*=\s*"([^"]*)"/i.exec(m[2]);
+        if (href && el.tagName === 'A') {
+          var u = decodeEntities(href[1]);
+          if (/^(https?:|mailto:|\/|#)/i.test(u)) {
+            el.href = u;
+            el.rel = 'noopener';
+            if (!/^(https?:|mailto:)/i.test(u)) el.removeAttribute('href');
+          }
+        }
+        el.appendChild(document.createTextNode(decodeEntities(m[3])));
+        target.appendChild(el);
+      } else if (/^<br/i.test(m[0])) {
+        target.appendChild(document.createElement('br'));
+      } else {
+        target.appendChild(document.createTextNode(m[0]));
+      }
+    }
+    plain(str.slice(last));
+  }
+  function decodeEntities(s) {
+    return String(s)
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&rarr;/g, '\u2192').replace(/&mdash;/g, '\u2014').replace(/&ndash;/g, '\u2013')
+      .replace(/&lsquo;/g, '\u2018').replace(/&rsquo;/g, '\u2019')
+      .replace(/&ldquo;/g, '\u201C').replace(/&rdquo;/g, '\u201D')
+      .replace(/&nbsp;/g, '\u00A0').replace(/&middot;/g, '\u00B7').replace(/&amp;/g, '&');
+  }
+
+  /* deep links: open the timeline entry a hash points at */
+  window.addEventListener('hashchange', focusHash);
+  function focusHash() {
+    var id = location.hash.slice(1);
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var ev = el.closest ? el.closest('.ev') : null;
+    if (ev) { ev.classList.add('open'); }
+  }
+
+  run();
+  focusHash();
+})();
+</script>
+</body>
+</html>
